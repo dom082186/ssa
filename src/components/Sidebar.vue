@@ -1,12 +1,9 @@
 <template>
-  <v-navigation-drawer
-    app
-    fixed
-    >
+  <v-navigation-drawer app fixed>
     <v-list shaped>
       <v-list-item two-line>
         <v-list-item-avatar>
-          <img :src="require('../assets/logo.png')">
+          <img :src="require('../assets/logo.png')" />
         </v-list-item-avatar>
 
         <v-list-item-content>
@@ -32,6 +29,14 @@
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title v-text="'About'"></v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item exact :to="{ name: 'UsersList' }">
+          <v-list-item-icon>
+            <v-icon v-text="`mdi-account`"></v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title v-text="`Users`"></v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list-item-group>
