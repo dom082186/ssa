@@ -1,5 +1,6 @@
 <template>
   <div class="users-list pa-6">
+    <Notification v-if="showNotification" type="success" :text="notificationText" />
     <div class="d-flex justify-end mb-5">
       <FormButton
         label="Add User"
@@ -7,7 +8,7 @@
         @click="$router.push('/users/add')"
       />
     </div>
-    <v-data-table :headers="headers" :items="users">
+    <v-data-table :headers="headers" :items="getUsers">
       <template v-slot:item.actions="{ item }">
         <template v-if="hasSoftDeleteHandler(item)">
           <v-icon class="btn-action mr-3" @click="removeSoftDeletedUsers(item)"
@@ -34,13 +35,13 @@
         <v-card-text>
           <h1 class="text-center mb-5">Delete User</h1>
           <h2 class="font-weight-regular">
-            Are you sure you want to delete {{ userToBeDeleted.firstName }}
-            {{ userToBeDeleted.lastName }}?
+            Are you sure you want to delete {{ userToBeDeleted.firstname }}
+            {{ userToBeDeleted.lastname }}?
           </h2>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary">Delete</v-btn>
+          <v-btn color="primary" @click="deleteUserHandler(userToBeDeleted)">Delete</v-btn>
           <v-btn @click="showDeleteDialogHandler(false, {})">Cancel</v-btn>
         </v-card-actions>
       </v-card>
@@ -51,36 +52,40 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import FormButton from '../../components/atoms/Forms/FormButton.vue'
-import users from '../../assets/json/users.json'
+import Notification from '../../components/atoms/Notification.vue'
 
 export default {
   name: 'UsersList',
   components: {
-    FormButton
+    FormButton,
+    Notification
   },
   data () {
     return {
       headers: [
-        { text: 'First Name', value: 'firstName' },
-        { text: 'Last Name', value: 'lastName' },
+        { text: 'First Name', value: 'firstname' },
+        { text: 'Last Name', value: 'lastname' },
         { text: 'Username', value: 'username' },
         { text: 'Email', value: 'email' },
         { text: 'Actions', value: 'actions', align: 'center' }
       ],
-      users,
       showDeleteDialog: false,
-      userToBeDeleted: {}
+      userToBeDeleted: {},
+      showNotification: false,
+      notificationText: null
     }
   },
   computed: {
     ...mapGetters({
+      getUsers: 'users/getUsers',
       getSoftDeletedUsers: 'users/getSoftDeletedUsers'
     })
   },
   methods: {
     ...mapActions({
       setSoftDeletedUsers: 'users/setSoftDeletedUsers',
-      removeSoftDeletedUsers: 'users/removeSoftDeletedUsers'
+      removeSoftDeletedUsers: 'users/removeSoftDeletedUsers',
+      deleteUser: 'users/deleteUser'
     }),
     async loginHandler () {
       try {
@@ -110,6 +115,23 @@ export default {
     showDeleteDialogHandler (show, item) {
       this.showDeleteDialog = show
       this.userToBeDeleted = item
+    },
+    async deleteUserHandler (user) {
+      try {
+        await this.deleteUser(user)
+        this.showDeleteDialogHandler(false, {})
+        this.notificationText = 'User deleted successfully.'
+        this.showNotification = true
+      } catch (error) {
+
+      } finally {
+        this.hideNotificationHandler()
+      }
+    },
+    hideNotificationHandler () {
+      setInterval(() => {
+        this.showNotification = false
+      }, 3000)
     }
   },
   mounted () {
