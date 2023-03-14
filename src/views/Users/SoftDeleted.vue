@@ -1,18 +1,10 @@
 <template>
-  <div class="users-list pa-6">
+  <div class="users-soft-deleted pa-6">
+    <h1>Soft Deleted Users</h1>
     <Notification v-if="showNotification" type="success" :text="notificationText" />
-    <div class="d-flex justify-end mb-5">
-      <FormButton
-        label="Add User"
-        color="primary"
-        @click="$router.push('/users/add')"
-      />
-      <FormButton v-if="getSoftDeletedUsers.length" class="ml-3" label="Soft Deleted Users" color="error" @click="$router.push('/users/soft-deleted')" />
-    </div>
-    <v-data-table :headers="headers" :items="users">
+    <v-data-table :headers="headers" :items="getSoftDeletedUsers">
       <template v-slot:item.actions="{ item }">
-        <template v-if="hasSoftDeleteHandler(item)">
-          <v-icon class="btn-action mr-3" @click="removeSoftDeletedUsers(item)"
+        <v-icon class="btn-action mr-3" @click="removeSoftDeletedUsersHandler(item)"
             >mdi-restore</v-icon
           >
           <v-icon
@@ -20,15 +12,6 @@
             @click="showDeleteDialogHandler(true, item)"
             >mdi-delete</v-icon
           >
-        </template>
-        <template v-else>
-          <v-icon class="btn-action mr-3" @click="updateUserHandler(item)">
-            mdi-pencil
-          </v-icon>
-          <v-icon class="btn-action" @click="setSoftDeletedUsersHandler(item)">
-            mdi-close
-          </v-icon>
-        </template>
       </template>
     </v-data-table>
     <v-dialog v-model="showDeleteDialog" width="450">
@@ -51,15 +34,11 @@
 </template>
 
 <script>
-import differenceBy from 'lodash/differenceBy'
 import { mapGetters, mapActions } from 'vuex'
-import FormButton from '../../components/atoms/Forms/FormButton.vue'
 import Notification from '../../components/atoms/Notification.vue'
 
 export default {
-  name: 'UsersList',
   components: {
-    FormButton,
     Notification
   },
   data () {
@@ -73,19 +52,13 @@ export default {
       ],
       showDeleteDialog: false,
       userToBeDeleted: {},
-      showNotification: false,
-      notificationText: null
+      showNotification: false
     }
   },
   computed: {
     ...mapGetters({
-      getUsers: 'users/getUsers',
       getSoftDeletedUsers: 'users/getSoftDeletedUsers'
-    }),
-    users () {
-      const users = differenceBy(this.getUsers, this.getSoftDeletedUsers, 'id')
-      return users
-    }
+    })
   },
   methods: {
     ...mapActions({
@@ -93,36 +66,12 @@ export default {
       removeSoftDeletedUsers: 'users/removeSoftDeletedUsers',
       deleteUser: 'users/deleteUser'
     }),
-    async loginHandler () {
-      try {
-        const params = {
-          username: 'janesmith',
-          password: 'Jane@8799'
-        }
-        const result = await this.axios.post('login', params)
-        console.log(result)
-      } catch (error) {
-        console.log(error)
-      }
-    },
-    updateUserHandler (item) {
-      const id = item?.id
-      this.$router.push({
-        path: `/users/update/${id}`
-      })
-    },
-    hasSoftDeleteHandler (user) {
-      const hasData = this.getSoftDeletedUsers.filter(
-        softDeletedUser => softDeletedUser.id === user?.id
-      )
-      if (hasData.length) return true
-      return false
-    },
     showDeleteDialogHandler (show, item) {
       this.showDeleteDialog = show
       this.userToBeDeleted = item
     },
     async deleteUserHandler (user) {
+      this.removeSoftDeletedUsers(user)
       try {
         await this.deleteUser(user)
         this.showDeleteDialogHandler(false, {})
@@ -134,10 +83,10 @@ export default {
         this.hideNotificationHandler()
       }
     },
-    async setSoftDeletedUsersHandler (user) {
+    removeSoftDeletedUsersHandler (user) {
       try {
-        this.setSoftDeletedUsers(user)
-        this.notificationText = 'User deactivated successfully'
+        this.removeSoftDeletedUsers(user)
+        this.notificationText = 'User activated successfully'
         this.showNotification = true
       } catch (error) {
 
@@ -150,17 +99,10 @@ export default {
         this.showNotification = false
       }, 3000)
     }
-  },
-  mounted () {
-    this.loginHandler()
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.users-list {
-  .btn-action {
-    cursor: pointer;
-  }
-}
+
 </style>

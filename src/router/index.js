@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import UsersList from '../views/Users/List.vue'
 import UsersAdd from '../views/Users/Add.vue'
 import UsersUpdate from '../views/Users/Update.vue'
+import UsersSoftDeleted from '../views/Users/SoftDeleted.vue'
 
 Vue.use(VueRouter)
 
@@ -36,6 +37,11 @@ const routes = [
     path: '/users/update/:id',
     name: 'UsersUpdate',
     component: UsersUpdate
+  },
+  {
+    path: '/users/soft-deleted',
+    name: 'UsersSoftDeleted',
+    component: UsersSoftDeleted
   }
 ]
 

@@ -56,7 +56,8 @@ export default {
       },
       isSubmitting: false,
       showNotification: false,
-      notificationText: null
+      notificationText: null,
+      notificationInterval: null
     }
   },
   computed: {
@@ -118,7 +119,7 @@ export default {
       }
     },
     hideNotificationHandler () {
-      setInterval(() => {
+      this.notificationInterval = setTimeout(() => {
         this.showNotification = false
         this.$router.push({
           path: '/users'
